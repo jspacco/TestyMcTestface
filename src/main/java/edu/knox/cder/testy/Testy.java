@@ -167,13 +167,19 @@ public class Testy extends Application
 			saveAnswerButton.setOnAction(event -> {
 				String text = answer.getText();
 				methodData.setAnswer(text);
+				update();
 			});
 			
 			
 			// add the title and the mouse click event for expanding/contracting each method
 			String headerString = methodData.getHeader();
 	        ExpandableTitledPane titlePane = new ExpandableTitledPane(headerString, content);
+			if (methodData.getAnswer() != null)
+				titlePane.getStyleClass().add("titled-pane-blue");
+			else
+				titlePane.getStyleClass().add("titled-pane-green");
 	        titlePane.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+				// TODO: is this mouse handler even necessary?
 	        	System.out.printf("%s %s %s %s\n", event.getButton(), 
 	        			titlePane.isExpanded(), 
 	        			titlePane.expandedProperty().get(),

@@ -34,3 +34,12 @@
     -fx-border-width: 1.5;
     -fx-border-insets: -5;
 }
+
+.titled-pane-blue > .title {
+    -fx-background-color: lightblue;
+}
+  
+.titled-pane-green > .title {
+    -fx-background-color: lightgreen;
+}
+  
