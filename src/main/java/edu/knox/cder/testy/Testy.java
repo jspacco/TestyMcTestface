@@ -48,11 +48,7 @@ public class Testy extends Application
     	
     	methodPanel.getChildren().clear();
     	methodPanel.getChildren().addAll(methodPanes);
-    	
-    	//Accordion accordion = new Accordion();
-    	//accordion.getPanes().addAll(methodPanes);
-    	//if (methodPanes.size() > 0) accordion.setExpandedPane(methodPanes.get(0));
-    	//methodPanel.getChildren().add(accordion);
+		methodPanel.setPrefHeight(600);
     }
     
     private List<ExpandableTitledPane> createMethodPanes()
@@ -294,7 +290,9 @@ public class Testy extends Application
         root.getChildren().add(createMenuBar(primaryStage));
         
         methodPanel = new VBox();
-        root.getChildren().add(new ScrollPane(methodPanel));
+		methodPanel.setFillWidth(true);
+		ScrollPane scrollPane = new ScrollPane(methodPanel);
+        root.getChildren().add(scrollPane);
         
         Scene scene = new Scene(root, 800, 600);
 		URL styleURL = getClass().getResource("/style1.css");
