@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -291,7 +292,9 @@ public class Testy extends Application
         root.getChildren().add(new ScrollPane(methodPanel));
         
         Scene scene = new Scene(root, 800, 600);
-        scene.getStylesheets().add("./style1.css");
+		URL styleURL = getClass().getResource("/style1.css");
+		String stylesheet = styleURL.toExternalForm();
+		scene.getStylesheets().add(stylesheet);
         primaryStage.setTitle("TESTify");
         primaryStage.setScene(scene);
         primaryStage.show();

@@ -1,4 +1,5 @@
 plugins {
+    id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.13'
 }
@@ -25,5 +26,21 @@ dependencies{
 }
 
 application {
-    mainClassName = 'edu.knox.cder.testy.Testy'
+    // https://stackoverflow.com/questions/52569724/javafx-11-create-a-jar-file-with-gradle
+    mainClassName = 'edu.knox.cder.testy.Main'
+}
+
+tasks.withType(Jar) {
+    // TODO: why is this necessary?
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// https://gist.github.com/jdavidzapatab/1c974b5422aa5665c59cc6a6a7a91cc9
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': "${mainClassName}"
+    }
+    archiveBaseName = "${rootProject.name}"
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
