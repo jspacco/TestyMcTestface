@@ -23,7 +23,6 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
@@ -45,7 +44,7 @@ public class Testy extends Application
 
     private void update()
     {
-    	List<TitledPane> methodPanes = createMethodPanes();
+    	List<ExpandableTitledPane> methodPanes = createMethodPanes();
     	
     	methodPanel.getChildren().clear();
     	methodPanel.getChildren().addAll(methodPanes);
@@ -56,9 +55,9 @@ public class Testy extends Application
     	//methodPanel.getChildren().add(accordion);
     }
     
-    private List<TitledPane> createMethodPanes()
+    private List<ExpandableTitledPane> createMethodPanes()
     {
-    	List<TitledPane> methodPanes = new LinkedList<>();
+    	List<ExpandableTitledPane> methodPanes = new LinkedList<>();
 
     	for (int index=0; index < testClassData.getMethodCount(); index++)
     	{
@@ -177,7 +176,7 @@ public class Testy extends Application
 			
 			// add the title and the mouse click event for expanding/contracting each method
 			String headerString = methodData.getHeader();
-	        TitledPane titlePane = new TitledPane(headerString, content);
+	        ExpandableTitledPane titlePane = new ExpandableTitledPane(headerString, content);
 	        titlePane.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
 	        	System.out.printf("%s %s %s %s\n", event.getButton(), 
 	        			titlePane.isExpanded(), 
@@ -185,9 +184,9 @@ public class Testy extends Application
 	        			event.getSource().getClass());
 
 	        	if (event.getButton() == MouseButton.PRIMARY) {
-	        		System.out.printf("PRIMARY, is expanded? \n");
+	        		System.out.printf("PRIMARY, is expanded? %s\n", titlePane.isExpanded());
 	        	}
-	        	titlePane.setExpanded(!titlePane.isExpanded());	
+	        	titlePane.setExpanded(!titlePane.isExpanded());
 	        });
 			methodPanes.add(titlePane);
     	}
@@ -301,7 +300,7 @@ public class Testy extends Application
 		URL styleURL = getClass().getResource("/style1.css");
 		String stylesheet = styleURL.toExternalForm();
 		scene.getStylesheets().add(stylesheet);
-        primaryStage.setTitle("Test McTestface");
+        primaryStage.setTitle("Testy McTestface");
         primaryStage.setScene(scene);
         primaryStage.show();
         
