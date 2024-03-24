@@ -63,10 +63,12 @@ public class TestCaseData
 		
 		Object[] result = new Object[actualParameters.size()];
 		for (int i=0; i < actualParameters.size(); i++)
-		{			String p = actualParameters.get(i);
+		{			
+			String p = actualParameters.get(i);
 			String type = types[i];
-			// System.err.println(p);
-			// TODO validate p against its type
+			//System.err.println(p);
+			// TODO: validate p against its type
+
 			
 			if (type.equals("int[]"))
 			{
@@ -80,7 +82,7 @@ public class TestCaseData
 			{
 				result[i] = StaticMethodExtractor.readString(p);
 			} 
-			else if (type.equals("String"))
+			else if (type.equals("String[]"))
 			{
 				result[i] = StaticMethodExtractor.readStringArray(p);
 			} 

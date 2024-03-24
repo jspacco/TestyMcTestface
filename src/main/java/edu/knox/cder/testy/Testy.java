@@ -37,6 +37,7 @@ public class Testy extends Application
 {
 	private File jsonFile;
 	private boolean dirty = false;
+	//private boolean editAnswer = true;
 	private TestClassData testClassData;
 	private List<Method> methods;
 	private VBox root;
@@ -58,7 +59,7 @@ public class Testy extends Application
     private List<TitledPane> createMethodPanes()
     {
     	List<TitledPane> methodPanes = new LinkedList<>();
-    	
+
     	for (int index=0; index < testClassData.getMethodCount(); index++)
     	{
     		MethodData methodData = testClassData.getMethods().get(index);
@@ -143,38 +144,32 @@ public class Testy extends Application
 					
 					update();
 				} catch (InvocationTargetException ex) {
-					// TODO ugly duplicate code
 					Throwable cause = ex.getCause();
-					testCaseData.setResult("unknown runtime exception");
-					if (cause != null)
-						testCaseData.setResult(cause.getMessage());
-					
-					methodData.addTest(testCaseData);
-					
-					// set dirty so that we save to the json file
-					dirty = true;
-					
-					update();
+					System.out.println(cause.getMessage());
+					alert(methodData.getName(), cause.toString());
 				} catch (Exception ex) {
 					// some other unexpected exception here
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("Error");
-					alert.setHeaderText(String.format("Error running method %s", methodData.getName()));
-					alert.setContentText(ex.toString());
-					alert.showAndWait();
-					throw new RuntimeException(ex);
+					alert(methodData.getName(), ex.toString());
 				}
 			});
 			
-			// create a new textfield
+			// next row
+			int answerRow = newTestRow+1;
+			// create answer textfield
 			TextField answer = new TextField();
 			answer.setPromptText("What does this method do?");
-			answer.setEditable(true);
-			content.addRow(newTestRow+1, answer);
+			String title = "Save Answer";
+			if (methodData.getAnswer() != null)
+			{
+				answer.setText(methodData.getAnswer());
+				title = "Edit Answer";
+			}
+
+			content.addRow(answerRow, answer);
 			// create a button to add the answer
-			Button addAnswer = new Button("Answer");
-			content.addRow(newTestRow+2, addAnswer);
-			addAnswer.setOnAction(event -> {
+			Button saveAnswerButton = new Button(title);
+			content.addRow(answerRow, saveAnswerButton);
+			saveAnswerButton.setOnAction(event -> {
 				String text = answer.getText();
 				methodData.setAnswer(text);
 			});
@@ -199,6 +194,15 @@ public class Testy extends Application
     	
     	return methodPanes;
     }
+
+	private void alert(String methodName, String message)
+	{
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Test Case Error");
+		alert.setHeaderText(String.format("Error running method %s", methodName));
+		alert.setContentText(message);
+		alert.showAndWait();
+	}
     
     private boolean saveAsPrompt(Stage stage)
     {
@@ -284,15 +288,10 @@ public class Testy extends Application
     }
 
     @Override
-    public void start(Stage primaryStage) {
-    	
+    public void start(Stage primaryStage)
+	{
         root = new VBox();
-        //root.getStyleClass().add("root");
 
-        // TODO legitimate css styling
-        //root.setStyle("-fx-font-size: 16pt;");
-        //root.setStyle("-fx-font-family: \"Courier New\";");
-        //root.getStylesheets().add(getClass().getResource("root.css").toExternalForm());
         root.getChildren().add(createMenuBar(primaryStage));
         
         methodPanel = new VBox();
@@ -302,12 +301,12 @@ public class Testy extends Application
 		URL styleURL = getClass().getResource("/style1.css");
 		String stylesheet = styleURL.toExternalForm();
 		scene.getStylesheets().add(stylesheet);
-        primaryStage.setTitle("TESTify");
+        primaryStage.setTitle("Test McTestface");
         primaryStage.setScene(scene);
         primaryStage.show();
         
         primaryStage.setOnCloseRequest(event -> {
-        	System.out.println("oncloserequest");
+        	//System.out.println("oncloserequest");
         	// if the test cases are not dirty, then just quit
         	if (!dirty) return;
         	boolean quit = unsavedQuitPrompt(primaryStage);
@@ -319,7 +318,7 @@ public class Testy extends Application
 	private void loadJsonFile(File file) throws ClassNotFoundException, IOException
 	{
 		if (dirty) {
-			//TODO make this an alert
+			//TODO: make this an alert
 			System.out.println("Unsaved changes, please save first!");
 			return;
 		}
@@ -335,7 +334,7 @@ public class Testy extends Application
 	private void loadClassFile(String classFile) throws ClassNotFoundException, IOException, ParseException
 	{
 		if (dirty) {
-			// TODO make into Alert
+			// TODO: make into Alert
 			//JOptionPane.showMessageDialog(null, "Unsaved changes, please save first!");
 			return;
 		}
@@ -433,7 +432,12 @@ public class Testy extends Application
 			else if (element instanceof int[])
 			{
 				sb.append(Arrays.toString((int[]) element));
-			} 
+			}
+			else if (element instanceof String[])
+			{
+				//TODO: test String[]
+				sb.append(Arrays.toString((String[]) element));
+			}
 			else 
 			{
 				sb.append(element); // handle other types as needed
