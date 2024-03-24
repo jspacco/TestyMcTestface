@@ -13,19 +13,21 @@ public class MethodData {
     private List<ParameterData> parameters;
     private String returnType;
     private List<TestCaseData> tests;
+    private String answer;
 
     public MethodData(String name, String header, String returnType, List<ParameterData> parameters)
     {
-    	this(name, header, returnType, parameters, new ArrayList<TestCaseData>());
+    	this(name, header, returnType, parameters, new ArrayList<TestCaseData>(), null);
     }
     
-    public MethodData(String name, String header, String returnType, List<ParameterData> parameters, List<TestCaseData> tests)
+    public MethodData(String name, String header, String returnType, List<ParameterData> parameters, List<TestCaseData> tests, String answer)
     {
         this.name = name;
         this.header = header;
         this.parameters = parameters;
         this.returnType = returnType;
         this.tests = tests;
+        this.answer = answer;
     }
     
     public void addTest(TestCaseData test)
@@ -40,18 +42,17 @@ public class MethodData {
         methodMap.put("return", returnType);
         
         // convert the parameters into json
-        //List<Map<String, Object>> parameterList = methodMap.get("parameters", List.class);
         List<Map<String, Object>> parameterList = new ArrayList<>();
         parameters.forEach(p -> parameterList.add(p.toMap()));
         methodMap.put("parameters", parameterList);
        
-
-        
         // convert the test cases into json
-        //List<Map<String, Object>> testList = methodMap.get("tests", List.class);
         List<Map<String, Object>> testList = new ArrayList<>();
         tests.forEach(t -> testList.add(t.toMap()));
         methodMap.put("tests", testList);
+
+        // add the answer
+        methodMap.put("answer", answer);
 
         return methodMap;
     }
@@ -74,7 +75,9 @@ public class MethodData {
                 .map(t -> TestCaseData.fromMap(t))
                 .collect(Collectors.toList());
 
-        return new MethodData(name, header, returnType, parameters, tests);
+        String answer = (String) map.get("answer");
+
+        return new MethodData(name, header, returnType, parameters, tests, answer);
     }
 
 	public List<TestCaseData> getTests() {
@@ -109,6 +112,14 @@ public class MethodData {
 	public int getTestCount() {
 		return tests.size();
 	}
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
     
 }
 

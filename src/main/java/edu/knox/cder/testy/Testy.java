@@ -56,10 +56,6 @@ public class Testy extends Application
     	//methodPanel.getChildren().add(accordion);
     }
     
-    /*
-     * methodbox: VBox
-     */
-    
     private List<TitledPane> createMethodPanes()
     {
     	List<TitledPane> methodPanes = new LinkedList<>();
@@ -100,12 +96,12 @@ public class Testy extends Application
 				newTest.getChildren().add(textField);
 			}
 			// add the form for adding a new test to the last row
-			int lastRow = content.getRowCount();
-			content.addRow(lastRow, newTest);
+			int newTestRow = content.getRowCount();
+			content.addRow(newTestRow, newTest);
 
 			// OK "check" button for triggering us to add a new test case
 			Button check = new Button(" " + ((char)0x2713) +" ");
-			content.addRow(lastRow, check);
+			content.addRow(newTestRow, check);
 			
 			// clicking the "check" button adds a new test case
 			check.setOnAction(event -> {
@@ -171,6 +167,18 @@ public class Testy extends Application
 				}
 			});
 			
+			// create a new textfield
+			TextField answer = new TextField();
+			answer.setPromptText("What does this method do?");
+			answer.setEditable(true);
+			content.addRow(newTestRow+1, answer);
+			// create a button to add the answer
+			Button addAnswer = new Button("Answer");
+			content.addRow(newTestRow+2, addAnswer);
+			addAnswer.setOnAction(event -> {
+				String text = answer.getText();
+				methodData.setAnswer(text);
+			});
 			
 			
 			// add the title and the mouse click event for expanding/contracting each method
@@ -364,9 +372,6 @@ public class Testy extends Application
 					e.printStackTrace();
 				} 
 			}
-			//this.pack();
-			//this.repaint();
-			
     	});
     	fileMenu.getItems().add(loadJson);
     	
@@ -429,7 +434,8 @@ public class Testy extends Application
 			else if (element instanceof int[])
 			{
 				sb.append(Arrays.toString((int[]) element));
-			} else 
+			} 
+			else 
 			{
 				sb.append(element); // handle other types as needed
 			}
