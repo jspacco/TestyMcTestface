@@ -37,7 +37,6 @@ public class Testy extends Application
 {
 	private File jsonFile;
 	private boolean dirty = false;
-	//private boolean editAnswer = true;
 	private TestClassData testClassData;
 	private List<Method> methods;
 	private List<ExpandableTitledPane> methodPanes;
@@ -87,6 +86,29 @@ public class Testy extends Application
 		//System.out.printf("new test input %s\n", newTestInput.getClass());
 
 		methodPane.requestLayout();
+	}
+
+	private void saveAnswer(String answer, int index)
+	{
+		ExpandableTitledPane methodPane = methodPanes.get(index);
+		if (answer != null)
+		{
+			methodPane.getStyleClass().remove("titled-pane-grey");
+			methodPane.getStyleClass().add("titled-pane-green");
+
+			methodPane.setExpanded(false);
+			
+			GridPane content = (GridPane) methodPane.getContent();
+			//Node saveButton = content.getChildren().remove(content.getChildren().size()-1);
+			//Node textBox = content.getChildren().remove(content.getChildren().size()-1);
+
+			//content.addRow(content.getRowCount(), new Label(""), saveButton);
+		}
+		else
+		{
+			methodPane.getStyleClass().remove("titled-pane-green");
+			methodPane.getStyleClass().add("titled-pane-grey");
+		}
 	}
 	
 
@@ -216,7 +238,10 @@ public class Testy extends Application
 			saveAnswerButton.setOnAction(event -> {
 				String text = answer.getText();
 				methodData.setAnswer(text);
-				System.out.println("setting answer to " + text);
+				dirty = true;
+				// need to get the save thing
+				saveAnswer(text, index2);
+				//System.out.println("setting answer to " + text);
 				//update();
 			});
 			
