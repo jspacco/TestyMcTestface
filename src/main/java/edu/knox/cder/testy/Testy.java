@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -39,10 +40,57 @@ public class Testy extends Application
 	//private boolean editAnswer = true;
 	private TestClassData testClassData;
 	private List<Method> methods;
+	private List<ExpandableTitledPane> methodPanes;
 	private VBox root;
 	private VBox methodPanel;
 
-    private void update()
+	private void update(int methodIndex, TestCaseData testCaseData)
+	{
+		
+		// get the method pane and add a new test result to it
+		ExpandableTitledPane methodPane = methodPanes.get(methodIndex);
+		GridPane content = (GridPane) methodPane.getContent();
+
+		System.out.printf("before method %d %d\n", content.getRowCount(), content.getChildren().size());
+
+		// get the test label and the results label
+		Label testLabel = new Label(testCaseData.toString());
+		Label resultLabel = new Label(testCaseData.getResult());
+
+		// remove the last 2 rows, which are the new test form and the answer form
+		// we remove them by removing the children from the gridpane
+		// I can't figure out how to remove a whole row and there may
+		// not be a way to do that in JavaFX
+		Node saveButton = content.getChildren().remove(content.getChildren().size()-1);
+		Node saveInput = content.getChildren().remove(content.getChildren().size()-1);
+
+		Node checkButton = content.getChildren().remove(content.getChildren().size()-1);
+		Node newTestInput = content.getChildren().remove(content.getChildren().size()-1);
+
+		// this reduces the number of rows in the gridpane,
+		// and also reduces the number of children in the gridpane
+		// adding more children does not, however, increase the number of rows
+		// instead, we are going to add 3 new rows to the gridpane
+		// add the new test case to the grid
+		content.addRow(content.getRowCount(), testLabel, resultLabel);
+		// add back in the new test input row
+		content.addRow(content.getRowCount(), newTestInput, checkButton);
+		// add back in the answer row
+		content.addRow(content.getRowCount(), saveInput, saveButton);
+		
+		// clear the text fields used for the new test case
+		HBox hBox = (HBox) newTestInput;
+		((TextField)hBox.getChildren().get(0)).clear();
+		((TextField)hBox.getChildren().get(1)).clear();
+		//System.out.printf("hbox contains %s\n", hbox.getChildren().get(0).getClass());
+		//System.out.printf("hbox contains %s\n", hbox.getChildren().get(1).getClass());
+		//System.out.printf("new test input %s\n", newTestInput.getClass());
+
+		methodPane.requestLayout();
+	}
+	
+
+    private void update2()
     {
     	List<ExpandableTitledPane> methodPanes = createMethodPanes();
     	
@@ -53,7 +101,7 @@ public class Testy extends Application
     
     private List<ExpandableTitledPane> createMethodPanes()
     {
-    	List<ExpandableTitledPane> methodPanes = new LinkedList<>();
+    	methodPanes = new LinkedList<>();
 
     	for (int index=0; index < testClassData.getMethodCount(); index++)
     	{
@@ -99,6 +147,7 @@ public class Testy extends Application
 			content.addRow(newTestRow, check);
 			
 			// clicking the "check" button adds a new test case
+			int index2 = index;
 			check.setOnAction(event -> {
 				List<ParameterData> parameters = methodData.getParameters();
 				
@@ -112,7 +161,7 @@ public class Testy extends Application
 					}
 					else
 					{
-						// TODO highlight box with bad data
+						// TODO: highlight box with bad data
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setTitle("syntax error a test case");
 						alert.setHeaderText(String.format("%s should be of type %s", value, type));
@@ -122,6 +171,7 @@ public class Testy extends Application
 					}
 				}
 				
+				// new test case data
 				TestCaseData testCaseData = new TestCaseData(actualParameters);
 				
 				Object[] params = testCaseData.getParameterArray(methodData.getParameterTypes());
@@ -133,11 +183,10 @@ public class Testy extends Application
 					
 					testCaseData.setResult(res.toString());
 					methodData.addTest(testCaseData);
-					
 					// set dirty so that we save to the json file
 					dirty = true;
-					
-					update();
+
+					update(index2, testCaseData);
 				} catch (InvocationTargetException ex) {
 					Throwable cause = ex.getCause();
 					System.out.println(cause.getMessage());
@@ -167,7 +216,8 @@ public class Testy extends Application
 			saveAnswerButton.setOnAction(event -> {
 				String text = answer.getText();
 				methodData.setAnswer(text);
-				update();
+				System.out.println("setting answer to " + text);
+				//update();
 			});
 			
 			
@@ -175,9 +225,9 @@ public class Testy extends Application
 			String headerString = methodData.getHeader();
 	        ExpandableTitledPane titlePane = new ExpandableTitledPane(headerString, content);
 			if (methodData.getAnswer() != null)
-				titlePane.getStyleClass().add("titled-pane-blue");
-			else
 				titlePane.getStyleClass().add("titled-pane-green");
+			else
+				titlePane.getStyleClass().add("titled-pane-grey");
 	        titlePane.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
 				// TODO: is this mouse handler even necessary?
 	        	System.out.printf("%s %s %s %s\n", event.getButton(), 
@@ -235,6 +285,8 @@ public class Testy extends Application
     	ButtonType quitButtonType = new ButtonType("Quit without saving");
     	ButtonType saveAsButtonType = new ButtonType("Save As...");
     	
+		
+
     	Alert alert = new Alert(AlertType.CONFIRMATION);
     	alert.setTitle("Please choose an option:");
     	alert.setHeaderText("Unsaved changes detected!");
@@ -287,7 +339,7 @@ public class Testy extends Application
     	}
     	return false;
     }
-
+	//long lastRefreshTime = 0;
     @Override
     public void start(Stage primaryStage)
 	{
@@ -301,12 +353,24 @@ public class Testy extends Application
         root.getChildren().add(scrollPane);
         
         Scene scene = new Scene(root, 800, 600);
+
+		
+		//this goes after you've defined your scene, 
+		// but before you display your stage
+		// scene.addPreLayoutPulseListener(() -> {
+    	// 	long refreshTime = System.nanoTime();
+    	// 	System.out.println(refreshTime - lastRefreshTime);
+    	// 	lastRefreshTime = refreshTime;
+		// });
+
 		URL styleURL = getClass().getResource("/style1.css");
 		String stylesheet = styleURL.toExternalForm();
 		scene.getStylesheets().add(stylesheet);
         primaryStage.setTitle("Testy McTestface");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+		
         
         primaryStage.setOnCloseRequest(event -> {
         	//System.out.println("oncloserequest");
@@ -331,7 +395,7 @@ public class Testy extends Application
 		dirty = false;
 
 		// update the root panel to display the newly loaded data
-		update();
+		update2();
 	}
 	
 	private void loadClassFile(String classFile) throws ClassNotFoundException, IOException, ParseException
@@ -346,7 +410,7 @@ public class Testy extends Application
 		dirty = false;
 		System.out.printf("loaded %d methods from %s (%d now in testClassData)\n", methods.size(), testClassData.getClassName(), testClassData.getMethodCount());
 		
-		update();
+		update2();
 	}
     
     private MenuBar createMenuBar(Stage stage)
@@ -414,6 +478,17 @@ public class Testy extends Application
     		saveAsPrompt(stage);
     	});
     	fileMenu.getItems().add(saveAs);
+
+		MenuItem extra = new MenuItem("Extra");
+		extra.setOnAction(event -> {
+			ExpandableTitledPane pane = methodPanes.get(0);
+			GridPane content = (GridPane)pane.getContent();
+			System.out.println(content.getRowCount());
+			System.out.println(content.getChildren().size());
+			content.getChildren().stream().forEach(System.out::println);
+
+		});
+		fileMenu.getItems().add(extra);
     	
     	menuBar.getMenus().add(fileMenu);
 

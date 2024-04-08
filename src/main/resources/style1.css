@@ -35,8 +35,8 @@
     -fx-border-insets: -5;
 }
 
-.titled-pane-blue > .title {
-    -fx-background-color: lightblue;
+.titled-pane-grey > .title {
+    -fx-background-color: rgb(146, 148, 148);
 }
   
 .titled-pane-green > .title {
