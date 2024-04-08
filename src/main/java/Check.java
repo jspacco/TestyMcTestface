@@ -33,6 +33,13 @@ public class Check
 	{
 		nums[x] = x;
 	}
+
+	public static int mystery5(String[] words)
+	{
+		int x = 0;
+		for (String w : words) if (w != null && w.length() > 0) x++;
+		return x;
+	}
 	
 	public int instanceMethodBAD(int[] nums)
 	{
