@@ -2,6 +2,27 @@ Testy McTestface
 ===
 Given a classfile of static mystery methods, write simple test cases to infer what each method does
 
+## To build
+
+Clone this repo from github
+
+On Mac/Linux:
+change into the folder with a Terminal
+
+```bash
+./gradlew fatJar
+java -jar build/libs/TestyMcTestface-0.0.1.jar
+```
+
+On Windows:
+
+```command
+.\gradlew.bat fatJar
+java -jar build/libs/TestyMcTestface-0.0.1.jar
+```
+
+You can also run the main method with the run button in VS Code. The `main` method is located in the `Testy` class.
+
 Features
 ----
 * supports parameters of int[], int, String, and String[]
@@ -16,14 +37,11 @@ Requirements
     * Install using [these instructions](https://openjfx.io/openjfx-docs/#gradle)
     * My Mac required the x86 files for some reason, even though I have an M1 chip
 * gradle
-    * Ugh, this is such a mess to use in Eclipse; I feel like I'm learning LaTeX again for the first time and constantly copying the one document I know works
-
+    
 TODO
 ---
 * fxml for css styling
 * test String and String[]
 * trigger saving to JSON as soon as you upload a classfile
 	* autosave after adding every new test case
-* add a textbox for what each method does that students can enter
 * tooltips
-* syntax highlighting for the method header
