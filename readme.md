@@ -10,15 +10,15 @@ On Mac/Linux:
 change into the folder with a Terminal
 
 ```bash
-./gradlew fatJar
-java -jar build/libs/TestyMcTestface-0.0.1.jar
+./gradlew build
+./gradlew run
 ```
 
 On Windows:
 
 ```command
-.\gradlew.bat fatJar
-java -jar build/libs/TestyMcTestface-0.0.1.jar
+.\gradlew.bat build
+.\gradlew.bat run
 ```
 
 You can also run the main method with the run button in VS Code. The `main` method is located in the `Testy` class.
