@@ -1,6 +1,8 @@
 .gradle
 build/
 
+.DS_Store
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/gradle,visualstudiocode,java
 # Edit at https://www.toptal.com/developers/gitignore?templates=gradle,visualstudiocode,java
