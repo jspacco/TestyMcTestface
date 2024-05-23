@@ -244,6 +244,6 @@ public class StaticMethodExtractor
 		}
 		
 	}
-    
-    
+	
+
 }

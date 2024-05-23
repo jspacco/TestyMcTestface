@@ -79,8 +79,9 @@ public class Testy extends Application
 		
 		// clear the text fields used for the new test case
 		HBox hBox = (HBox) newTestInput;
-		((TextField)hBox.getChildren().get(0)).clear();
-		((TextField)hBox.getChildren().get(1)).clear();
+		hBox.getChildren().stream().forEach(n -> ((TextField)n).clear());
+		//((TextField)hBox.getChildren().get(0)).clear();
+		//((TextField)hBox.getChildren().get(1)).clear();
 		//System.out.printf("hbox contains %s\n", hbox.getChildren().get(0).getClass());
 		//System.out.printf("hbox contains %s\n", hbox.getChildren().get(1).getClass());
 		//System.out.printf("new test input %s\n", newTestInput.getClass());
@@ -208,13 +209,16 @@ public class Testy extends Application
 					// set dirty so that we save to the json file
 					dirty = true;
 
+					//TODO: the error is here with the exceptions!
 					update(index2, testCaseData);
+					//update2();
 				} catch (InvocationTargetException ex) {
 					Throwable cause = ex.getCause();
 					System.out.println(cause.getMessage());
 					alert(methodData.getName(), cause.toString());
 				} catch (Exception ex) {
 					// some other unexpected exception here
+					ex.printStackTrace();
 					alert(methodData.getName(), ex.toString());
 				}
 			});
@@ -520,7 +524,7 @@ public class Testy extends Application
     	return menuBar;
     }
     
-    private static String arrayToString(Object[] array) {
+	public static String arrayToString(Object[] array) {
 		if (array == null || array.length == 0) {
 			return "[]";
 		}
