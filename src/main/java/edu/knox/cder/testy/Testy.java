@@ -49,13 +49,9 @@ public class Testy extends Application
 		// get the method pane and add a new test result to it
 		ExpandableTitledPane methodPane = methodPanes.get(methodIndex);
 		GridPane content = (GridPane) methodPane.getContent();
-		String methodName = methods.get(methodIndex).getName();
-		
-
-		//System.out.printf("before method %d %d\n", content.getRowCount(), content.getChildren().size());
 
 		// get the test label and the results label
-		Label testLabel = new Label(methodName+testCaseData.toString());
+		Label testLabel = new Label(testCaseData.toString());
 		Label resultLabel = new Label(testCaseData.getResult());
 
 		// remove the last 2 rows, which are the new test form and the answer form
@@ -97,10 +93,6 @@ public class Testy extends Application
 			methodPane.setExpanded(false);
 			
 			GridPane content = (GridPane) methodPane.getContent();
-			//Node saveButton = content.getChildren().remove(content.getChildren().size()-1);
-			//Node textBox = content.getChildren().remove(content.getChildren().size()-1);
-
-			//content.addRow(content.getRowCount(), new Label(""), saveButton);
 		}
 		else
 		{
@@ -131,11 +123,6 @@ public class Testy extends Application
     		// using GridPane instead of VBox to get 2 columns
     		GridPane content = new GridPane();
 			content.setHgap(30);
-    		// ColumnConstraints parameterCol = new ColumnConstraints();
-    		// parameterCol.setPercentWidth(50);
-    		// ColumnConstraints resultCol = new ColumnConstraints();
-    		// resultCol.setPercentWidth(50);
-    		// content.getColumnConstraints().addAll(parameterCol, resultCol);
     		
 			// put each test into its own row
 			for (int i=0; i < methodData.getTestCount(); i++)
@@ -143,8 +130,7 @@ public class Testy extends Application
 				final int testNum = i;
 				TestCaseData testCase = methodData.getTests().get(testNum);
 				// add to column 0, row i
-				// testCaseData does not store the method name, so we need to add it here
-				content.add(new Label(methodData.getName()+testCase.toString()), 0, i);
+				content.add(new Label(testCase.toString()), 0, i);
 				// add to column 1, row i
 				content.add(new Label(testCase.getResult()), 1, i);
 				
@@ -210,22 +196,26 @@ public class Testy extends Application
 
 					update(index2, testCaseData);
 				} catch (InvocationTargetException ex) {
-					System.out.println("EX1");
-					
-					Throwable cause = ex.getCause();
-					System.out.println(cause.getMessage());
+					// an exception happened when calling the method
+					// this can happen if there are test inputs that legitimately
+					// cause an exception. For example, if the method 
+					// gets at a given index and we give an index that is out of bounds
+					// we should get an exception
 
+					Throwable cause = ex.getCause();
 					testCaseData.setResult("EXCEPTION: " + cause.getMessage());
 					methodData.addTest(testCaseData);
 					// set dirty so that we save to the json file
 					dirty = true;
 
-					//TODO: the error is here with the exceptions!
 					update(index2, testCaseData);
-
-					//alert(methodData.getName(), cause.toString());
 				} catch (Exception ex) {
 					// some other unexpected exception here
+					// we should give an alert to the user
+					// this usually means that the inputs for
+					// the test case were not valid, i.e. we 
+					// needed int[] and int and we gave something
+					// like: [1,2,3] [4], so the types don't match.
 					ex.printStackTrace();
 					alert(methodData.getName(), ex.toString());
 				}
@@ -253,8 +243,6 @@ public class Testy extends Application
 				dirty = true;
 				// need to get the save thing
 				saveAnswer(text, index2);
-				//System.out.println("setting answer to " + text);
-				//update();
 			});
 			
 			
@@ -376,7 +364,7 @@ public class Testy extends Application
     	}
     	return false;
     }
-	//long lastRefreshTime = 0;
+
     @Override
     public void start(Stage primaryStage)
 	{
@@ -391,23 +379,12 @@ public class Testy extends Application
         
         Scene scene = new Scene(root, 800, 600);
 
-		
-		//this goes after you've defined your scene, 
-		// but before you display your stage
-		// scene.addPreLayoutPulseListener(() -> {
-    	// 	long refreshTime = System.nanoTime();
-    	// 	System.out.println(refreshTime - lastRefreshTime);
-    	// 	lastRefreshTime = refreshTime;
-		// });
-
 		URL styleURL = getClass().getResource("/style1.css");
 		String stylesheet = styleURL.toExternalForm();
 		scene.getStylesheets().add(stylesheet);
         primaryStage.setTitle("Testy McTestface");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-		
         
         primaryStage.setOnCloseRequest(event -> {
         	//System.out.println("oncloserequest");
