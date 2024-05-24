@@ -49,11 +49,13 @@ public class Testy extends Application
 		// get the method pane and add a new test result to it
 		ExpandableTitledPane methodPane = methodPanes.get(methodIndex);
 		GridPane content = (GridPane) methodPane.getContent();
+		String methodName = methods.get(methodIndex).getName();
+		
 
-		System.out.printf("before method %d %d\n", content.getRowCount(), content.getChildren().size());
+		//System.out.printf("before method %d %d\n", content.getRowCount(), content.getChildren().size());
 
 		// get the test label and the results label
-		Label testLabel = new Label(testCaseData.toString());
+		Label testLabel = new Label(methodName+testCaseData.toString());
 		Label resultLabel = new Label(testCaseData.getResult());
 
 		// remove the last 2 rows, which are the new test form and the answer form
@@ -80,12 +82,7 @@ public class Testy extends Application
 		// clear the text fields used for the new test case
 		HBox hBox = (HBox) newTestInput;
 		hBox.getChildren().stream().forEach(n -> ((TextField)n).clear());
-		//((TextField)hBox.getChildren().get(0)).clear();
-		//((TextField)hBox.getChildren().get(1)).clear();
-		//System.out.printf("hbox contains %s\n", hbox.getChildren().get(0).getClass());
-		//System.out.printf("hbox contains %s\n", hbox.getChildren().get(1).getClass());
-		//System.out.printf("new test input %s\n", newTestInput.getClass());
-
+		
 		methodPane.requestLayout();
 	}
 
@@ -119,7 +116,7 @@ public class Testy extends Application
     	
     	methodPanel.getChildren().clear();
     	methodPanel.getChildren().addAll(methodPanes);
-		methodPanel.setPrefHeight(600);
+		methodPanel.setPrefHeight(800);
     }
     
     private List<ExpandableTitledPane> createMethodPanes()
@@ -133,11 +130,12 @@ public class Testy extends Application
     		
     		// using GridPane instead of VBox to get 2 columns
     		GridPane content = new GridPane();
-    		ColumnConstraints parameterCol = new ColumnConstraints();
-    		parameterCol.setPercentWidth(80);
-    		ColumnConstraints resultCol = new ColumnConstraints();
-    		resultCol.setPercentWidth(20);
-    		content.getColumnConstraints().addAll(parameterCol, resultCol);
+			content.setHgap(30);
+    		// ColumnConstraints parameterCol = new ColumnConstraints();
+    		// parameterCol.setPercentWidth(50);
+    		// ColumnConstraints resultCol = new ColumnConstraints();
+    		// resultCol.setPercentWidth(50);
+    		// content.getColumnConstraints().addAll(parameterCol, resultCol);
     		
 			// put each test into its own row
 			for (int i=0; i < methodData.getTestCount(); i++)
@@ -145,7 +143,8 @@ public class Testy extends Application
 				final int testNum = i;
 				TestCaseData testCase = methodData.getTests().get(testNum);
 				// add to column 0, row i
-				content.add(new Label(testCase.toString()), 0, i);
+				// testCaseData does not store the method name, so we need to add it here
+				content.add(new Label(methodData.getName()+testCase.toString()), 0, i);
 				// add to column 1, row i
 				content.add(new Label(testCase.getResult()), 1, i);
 				
@@ -209,13 +208,22 @@ public class Testy extends Application
 					// set dirty so that we save to the json file
 					dirty = true;
 
-					//TODO: the error is here with the exceptions!
 					update(index2, testCaseData);
-					//update2();
 				} catch (InvocationTargetException ex) {
+					System.out.println("EX1");
+					
 					Throwable cause = ex.getCause();
 					System.out.println(cause.getMessage());
-					alert(methodData.getName(), cause.toString());
+
+					testCaseData.setResult("EXCEPTION: " + cause.getMessage());
+					methodData.addTest(testCaseData);
+					// set dirty so that we save to the json file
+					dirty = true;
+
+					//TODO: the error is here with the exceptions!
+					update(index2, testCaseData);
+
+					//alert(methodData.getName(), cause.toString());
 				} catch (Exception ex) {
 					// some other unexpected exception here
 					ex.printStackTrace();
@@ -265,7 +273,7 @@ public class Testy extends Application
 	        			event.getSource().getClass());
 
 	        	if (event.getButton() == MouseButton.PRIMARY) {
-	        		System.out.printf("PRIMARY, is expanded? %s\n", titlePane.isExpanded());
+	        		//System.out.printf("PRIMARY, is expanded? %s\n", titlePane.isExpanded());
 	        	}
 	        	titlePane.setExpanded(!titlePane.isExpanded());
 	        });
