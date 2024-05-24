@@ -492,17 +492,6 @@ public class Testy extends Application
     		saveAsPrompt(stage);
     	});
     	fileMenu.getItems().add(saveAs);
-
-		MenuItem extra = new MenuItem("Extra");
-		extra.setOnAction(event -> {
-			ExpandableTitledPane pane = methodPanes.get(0);
-			GridPane content = (GridPane)pane.getContent();
-			System.out.println(content.getRowCount());
-			System.out.println(content.getChildren().size());
-			content.getChildren().stream().forEach(System.out::println);
-
-		});
-		fileMenu.getItems().add(extra);
     	
     	menuBar.getMenus().add(fileMenu);
 
