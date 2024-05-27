@@ -2,11 +2,6 @@
     Document   : controlStyle2
 */
 
-.foo{
-	-fx-font-size: 16pt;
-    -fx-font-family: "Courier New";
-}
-
 .menubar{
 	-fx-font-size: 14pt;
     -fx-font-family: "Roboto";
@@ -42,4 +37,9 @@
 .titled-pane-green > .title {
     -fx-background-color: lightgreen;
 }
-  
+
+.parameter-label {
+    -fx-font-size: 14pt;
+    -fx-font-family: "Roboto";
+    -fx-font-weight: bold;
+}

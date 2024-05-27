@@ -4,6 +4,8 @@ Given a classfile of static mystery methods, write simple test cases to infer wh
 
 ## To build
 
+Be sure you have Java 21 installed and that it is the default version of Java on your path.
+
 Clone this repo from github
 
 On Mac/Linux:

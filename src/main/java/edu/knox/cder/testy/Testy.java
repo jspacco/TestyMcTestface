@@ -123,6 +123,13 @@ public class Testy extends Application
     		// using GridPane instead of VBox to get 2 columns
     		GridPane content = new GridPane();
 			content.setHgap(30);
+
+			Label parameterLabel = new Label("Parameters");
+			parameterLabel.getStyleClass().add("parameter-label");
+			Label returnValueLabel = new Label("Return values");
+			returnValueLabel.getStyleClass().add("parameter-label");
+			content.add(parameterLabel, 0, 0);
+			content.add(returnValueLabel, 1, 0);
     		
 			// put each test into its own row
 			for (int i=0; i < methodData.getTestCount(); i++)
@@ -130,9 +137,9 @@ public class Testy extends Application
 				final int testNum = i;
 				TestCaseData testCase = methodData.getTests().get(testNum);
 				// add to column 0, row i
-				content.add(new Label(testCase.toString()), 0, i);
+				content.add(new Label(testCase.toString()), 0, i + 1);
 				// add to column 1, row i
-				content.add(new Label(testCase.getResult()), 1, i);
+				content.add(new Label(testCase.getResult()), 1, i + 1);
 				
 			}
 			
