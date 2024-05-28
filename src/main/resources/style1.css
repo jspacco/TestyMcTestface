@@ -3,14 +3,16 @@
 */
 
 .menubar{
-	-fx-font-size: 14pt;
-    -fx-font-family: "Roboto";
     -fx-base: rgb(255, 255, 255);
     -fx-background: rgb(0, 0, 0);
 }
 
+.gridpane{
+    -fx-hgap: 50;
+}
+
 .root{
-    -fx-font-size: 16pt;
+    -fx-font-size: 20pt;
     -fx-font-family: "Courier New";
     -fx-base: rgb(132, 145, 47);
     -fx-background: rgb(225, 228, 203);
@@ -39,7 +41,14 @@
 }
 
 .parameter-label {
-    -fx-font-size: 14pt;
     -fx-font-family: "Roboto";
     -fx-font-weight: bold;
+}
+
+.exception-label {
+    -fx-font-color: rgb(161, 57, 57);
+}
+
+.selected {
+    -fx-background-color: lightblue;
 }

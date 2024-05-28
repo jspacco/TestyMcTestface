@@ -53,6 +53,12 @@ public class Testy extends Application
 		// get the test label and the results label
 		Label testLabel = new Label(testCaseData.toString());
 		Label resultLabel = new Label(testCaseData.getResult());
+		//TODO: add a method to check if a test case data is an exception
+		if (testCaseData.getResult().startsWith("EXCEPTION"))
+		{
+			// set the font red for the result label
+			resultLabel.getStyleClass().add("exception-label");
+		}
 
 		// remove the last 2 rows, which are the new test form and the answer form
 		// we remove them by removing the children from the gridpane
@@ -122,7 +128,9 @@ public class Testy extends Application
     		
     		// using GridPane instead of VBox to get 2 columns
     		GridPane content = new GridPane();
-			content.setHgap(30);
+			content.getStyleClass().add("gridpane");
+			
+			
 
 			Label parameterLabel = new Label("Parameters");
 			parameterLabel.getStyleClass().add("parameter-label");
@@ -136,11 +144,13 @@ public class Testy extends Application
 			{
 				final int testNum = i;
 				TestCaseData testCase = methodData.getTests().get(testNum);
-				// add to column 0, row i
-				content.add(new Label(testCase.toString()), 0, i + 1);
-				// add to column 1, row i
-				content.add(new Label(testCase.getResult()), 1, i + 1);
-				
+				// add to column 0, row i+1 (adding 1 because of the header row)
+				final Label label1 = new Label(testCase.toString());
+				content.add(label1, 0, i + 1);
+				// add to column 1, row i+1 (adding 1 because of the header row)
+				final Label label2 = new Label(testCase.getResult());
+				content.add(label2, 1, i + 1);
+				//TODO: add highlighting of the row when clicked
 			}
 			
 			HBox newTest = new HBox();
@@ -179,7 +189,7 @@ public class Testy extends Application
 						// TODO: highlight box with bad data
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setTitle("syntax error a test case");
-						alert.setHeaderText(String.format("%s should be of type %s", value, type));
+						alert.setHeaderText(String.format("parameter number %d should be of type %s; '%s' is not a valid input", i+1, type, value));
 						alert.setContentText(String.format("error in input %d", i));
 						alert.showAndWait();
 						return;
@@ -246,6 +256,10 @@ public class Testy extends Application
 			content.addRow(answerRow, saveAnswerButton);
 			saveAnswerButton.setOnAction(event -> {
 				String text = answer.getText();
+				if (text == null || text.isEmpty()) {
+					alert(methodData.getName(), "Please provide an answer");
+					return;
+				}
 				methodData.setAnswer(text);
 				dirty = true;
 				// need to get the save thing
@@ -281,8 +295,8 @@ public class Testy extends Application
 	private void alert(String methodName, String message)
 	{
 		Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("Test Case Error");
-		alert.setHeaderText(String.format("Error running method %s", methodName));
+		alert.setTitle("Error");
+		alert.setHeaderText(String.format("Error in method %s", methodName));
 		alert.setContentText(message);
 		alert.showAndWait();
 	}

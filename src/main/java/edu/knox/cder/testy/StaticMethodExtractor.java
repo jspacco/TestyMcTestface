@@ -215,6 +215,8 @@ public class StaticMethodExtractor
 	
 	static boolean validate(String text, String type)
 	{
+		if (text == null || text.isEmpty())
+			return false;
 		try {
 			if (type.equals("int[]"))
 			{

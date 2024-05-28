@@ -47,3 +47,8 @@ TODO
 * trigger saving to JSON as soon as you upload a classfile
 	* autosave after adding every new test case
 * tooltips
+
+### TODO
+* show the empty string better
+* " and ' both work for strings; probably just not this, or catch it in the GUI
+* 
