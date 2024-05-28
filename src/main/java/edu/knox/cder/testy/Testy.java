@@ -108,7 +108,7 @@ public class Testy extends Application
 	}
 	
 
-    private void update2()
+    private void reloadMethodPanes()
     {
     	List<ExpandableTitledPane> methodPanes = createMethodPanes();
     	
@@ -255,6 +255,8 @@ public class Testy extends Application
 			Button saveAnswerButton = new Button(title);
 			content.addRow(answerRow, saveAnswerButton);
 			saveAnswerButton.setOnAction(event -> {
+				// disallow saving empty answers
+				// these are most likely mistakes
 				String text = answer.getText();
 				if (text == null || text.isEmpty()) {
 					alert(methodData.getName(), "Please provide an answer");
@@ -429,8 +431,8 @@ public class Testy extends Application
 		methods = StaticMethodExtractor.getStaticMethods(testClassData.getClassName(), testClassData.getBytecode());
 		dirty = false;
 
-		// update the root panel to display the newly loaded data
-		update2();
+		// load the root panel to display the newly loaded data
+		reloadMethodPanes();
 	}
 	
 	private void loadClassFile(String classFile) throws ClassNotFoundException, IOException, ParseException
@@ -445,7 +447,8 @@ public class Testy extends Application
 		dirty = false;
 		System.out.printf("loaded %d methods from %s (%d now in testClassData)\n", methods.size(), testClassData.getClassName(), testClassData.getMethodCount());
 		
-		update2();
+		// reload the root panel to display the newly loaded data
+		reloadMethodPanes();
 	}
     
     private MenuBar createMenuBar(Stage stage)
