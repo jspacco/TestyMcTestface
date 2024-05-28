@@ -24,6 +24,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
@@ -247,8 +248,17 @@ public class Testy extends Application
 			if (methodData.getAnswer() != null)
 			{
 				answer.setText(methodData.getAnswer());
+				// the answer should show up in a tooltip when the user hovers over the textfield
+				// this is useful for long answers
+				// we want a short delay before the tooltip shows up, and word wrapping
+				answer.setTooltip(new Tooltip(methodData.getAnswer()));
+				answer.tooltipProperty().get().setShowDelay(javafx.util.Duration.millis(50));
+				answer.tooltipProperty().get().setWrapText(true);
+				answer.tooltipProperty().get().setPrefWidth(400);
 				title = "Edit Answer";
 			}
+			
+			
 
 			content.addRow(answerRow, answer);
 			// create a button to add the answer
