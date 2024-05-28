@@ -42,13 +42,12 @@ Requirements
     
 TODO
 ---
-* fxml for css styling
-* test String and String[]
 * trigger saving to JSON as soon as you upload a classfile
 	* autosave after adding every new test case
 * tooltips
-
-### TODO
 * show the empty string better
-* " and ' both work for strings; probably just not this, or catch it in the GUI
-* 
+* " and ' both work for strings since we are treating inputs as JSON; either allow this, or catch it in the GUI and disallow it
+* allow the expandable method panes to resize up to the size of the main window; right now there is a fixed size somewhere, probably set in the scene
+* highlight rows when we click them
+* allow copy/paste of test cases
+* check the UI of the test cases and make sure it makes sense; should we put in method name? should we try other columns to keep it more organized?
