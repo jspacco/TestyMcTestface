@@ -51,3 +51,12 @@ TODO
 * highlight rows when we click them
 * allow copy/paste of test cases
 * check the UI of the test cases and make sure it makes sense; should we put in method name? should we try other columns to keep it more organized?
+*  I would suggest to not name the button "Edit Answer" after something is typed into the answer box. When I pushed the button, it just brought me outside of the question that I was in and did not let me edit the text box. This button should be non-interactable until there was an edit made by the user within the text box so that it will save that answer and leave that question.
+* Tooltip should show up based on the TextBox, not just the answer
+* make a template that already has the opening and closing bracket, so you are not required to type it every single time
+* "enter" should save and run the test case
+* hint feature after 20 guesses — can we do that based on things?
+
+# 142
+* sequence of method calls and expected results
+* with Parsons problems for testing??? like, put the methods in order to get the expected result

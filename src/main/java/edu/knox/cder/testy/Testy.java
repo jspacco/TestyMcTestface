@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -23,6 +24,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
@@ -30,9 +32,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 public class Testy extends Application 
 {
@@ -122,6 +126,8 @@ public class Testy extends Application
     {
     	methodPanes = new LinkedList<>();
 
+		if (testClassData == null) return methodPanes;
+
     	for (int index=0; index < testClassData.getMethodCount(); index++)
     	{
     		MethodData methodData = testClassData.getMethods().get(index);
@@ -190,7 +196,9 @@ public class Testy extends Application
 						// TODO: highlight box with bad data
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setTitle("syntax error a test case");
-						alert.setHeaderText(String.format("parameter number %d should be of type %s; '%s' is not a valid input", i+1, type, value));
+						alert.setHeaderText(
+							String.format(
+								"parameter number %d should be of type %s; '%s' is not a valid input", i+1, type, value));
 						alert.setContentText(String.format("error in input %d", i));
 						alert.showAndWait();
 						return;
@@ -241,9 +249,21 @@ public class Testy extends Application
 			
 			// next row
 			int answerRow = newTestRow+1;
-			// create answer textfield
-			TextField answer = new TextField();
+			// create answer textarea
+			TextArea answer = new TextArea();
 			answer.setPromptText("What does this method do?");
+			answer.setWrapText(true);
+			answer.setPrefRowCount(3);
+			answer.setPrefColumnCount(25);
+			answer.getStyleClass().add("answer-textarea");
+
+			// vertical box for the answer that can grow
+			VBox answerBox = new VBox();
+			answerBox.setPadding(new Insets(10));
+        	answerBox.setSpacing(10);
+			VBox.setVgrow(answer, Priority.ALWAYS);
+			answerBox.getChildren().add(answer);
+
 			String title = "Save Answer";
 			if (methodData.getAnswer() != null)
 			{
@@ -251,16 +271,15 @@ public class Testy extends Application
 				// the answer should show up in a tooltip when the user hovers over the textfield
 				// this is useful for long answers
 				// we want a short delay before the tooltip shows up, and word wrapping
-				answer.setTooltip(new Tooltip(methodData.getAnswer()));
-				answer.tooltipProperty().get().setShowDelay(javafx.util.Duration.millis(50));
-				answer.tooltipProperty().get().setWrapText(true);
-				answer.tooltipProperty().get().setPrefWidth(400);
+				// answer.setTooltip(new Tooltip(methodData.getAnswer()));
+				// answer.tooltipProperty().get().setShowDelay(javafx.util.Duration.millis(50));
+				// answer.tooltipProperty().get().setWrapText(true);
+				// answer.tooltipProperty().get().setPrefWidth(400);
 				title = "Edit Answer";
 			}
-			
-			
 
-			content.addRow(answerRow, answer);
+			//content.addRow(answerRow, answer);
+			content.addRow(answerRow, answerBox);
 			// create a button to add the answer
 			Button saveAnswerButton = new Button(title);
 			content.addRow(answerRow, saveAnswerButton);
@@ -313,7 +332,7 @@ public class Testy extends Application
 		alert.showAndWait();
 	}
     
-    private boolean saveAsPrompt(Stage stage)
+    private boolean saveAsPrompt(Window window)
     {
     	FileChooser fileChooser = new FileChooser();
     	fileChooser.setTitle("Save As");
@@ -323,7 +342,7 @@ public class Testy extends Application
     		fileChooser.setInitialFileName(jsonFile.getName());
     	else
     		fileChooser.setInitialDirectory(new File("."));
-    	jsonFile = fileChooser.showSaveDialog(stage);
+    	jsonFile = fileChooser.showSaveDialog(window);
     	
     	return saveToJsonFile();
     	
@@ -336,7 +355,7 @@ public class Testy extends Application
     	   return alert;
     	}
     
-    private boolean unsavedQuitPrompt(Stage stage)
+    private boolean unsavedQuitPrompt(Window window)
     {
     	ButtonType saveButtonType = new ButtonType("Save");
     	ButtonType cancelButtonType = new ButtonType("Cancel");
@@ -372,7 +391,7 @@ public class Testy extends Application
     	}
     	else if (result == saveAsButtonType)
     	{
-    		saveAsPrompt(stage);
+    		saveAsPrompt(window);
     		saveToJsonFile();
     		return true;
     	}
@@ -455,7 +474,8 @@ public class Testy extends Application
 		testClassData = StaticMethodExtractor.readFromClassFile(classFile);
 		methods = StaticMethodExtractor.getStaticMethods(testClassData.getClassName(), testClassData.getBytecode());
 		dirty = false;
-		System.out.printf("loaded %d methods from %s (%d now in testClassData)\n", methods.size(), testClassData.getClassName(), testClassData.getMethodCount());
+		System.out.printf("loaded %d methods from %s (%d now in testClassData)\n", 
+		methods.size(), testClassData.getClassName(), testClassData.getMethodCount());
 		
 		// reload the root panel to display the newly loaded data
 		reloadMethodPanes();
@@ -467,8 +487,7 @@ public class Testy extends Application
     	menuBar.getStyleClass().add("menubar");
 
     	Menu fileMenu = new Menu("File");
-    	MenuItem loadJson = new MenuItem("Load json");
-    	loadJson.setOnAction(event -> {
+		createMenuItem(fileMenu, "Load json", () -> {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setInitialDirectory(new File("."));
 			jsonFile = fileChooser.showOpenDialog(stage);
@@ -486,10 +505,8 @@ public class Testy extends Application
 				} 
 			}
     	});
-    	fileMenu.getItems().add(loadJson);
     	
-    	MenuItem loadClassfile = new MenuItem("Load classfile");
-    	loadClassfile.setOnAction(event -> {
+    	createMenuItem(fileMenu, "Load classfile", () -> {
     		FileChooser fileChooser = new FileChooser();
 			fileChooser.setInitialDirectory(new File("."));
 			File classFile = fileChooser.showOpenDialog(stage);
@@ -505,32 +522,60 @@ public class Testy extends Application
 				} 
 			}
     	});
-    	fileMenu.getItems().add(loadClassfile);
     	
-    	MenuItem save = new MenuItem("Save");
-    	save.setOnAction(event -> {
+		createMenuItem(fileMenu, "Save", () -> {
     		// TODO save
     		if (jsonFile == null)
     		{
     			saveAsPrompt(stage);
-    		} else
+    		} 
+			else
     		{
     			boolean success = saveToJsonFile();
     			System.out.printf("Did we successfully save? %s\n", success);
     		}
     	});
-    	fileMenu.getItems().add(save);
     	
-    	MenuItem saveAs = new MenuItem("Save As");
-    	saveAs.setOnAction(event -> {
+		createMenuItem(fileMenu, "Save As", () -> {
     		saveAsPrompt(stage);
     	});
-    	fileMenu.getItems().add(saveAs);
+
+		createMenuItem(fileMenu, "Clear", () -> {
+			
+			if (dirty)
+			{
+				boolean quit = unsavedQuitPrompt(this.root.getScene().getWindow());
+				//TODO: add alert
+				if (!quit) 
+				{
+					System.out.println("Unable to asave file, quitting");
+					return;
+				}
+			}
+			testClassData = null;
+			methods = null;
+			reloadMethodPanes();
+		});
+
+		createMenuItem(fileMenu, "Quit", () -> {
+			if (dirty)
+			{
+        		boolean quit = unsavedQuitPrompt(this.root.getScene().getWindow());
+			}
+			System.exit(0);
+		});
     	
     	menuBar.getMenus().add(fileMenu);
 
     	return menuBar;
     }
+
+	private void createMenuItem(Menu menu, String name, Runnable action)
+	{
+		MenuItem menuItem = new MenuItem(name);
+		menuItem.setOnAction(event -> action.run());
+		menu.getItems().add(menuItem);
+	}
     
 	public static String arrayToString(Object[] array) {
 		if (array == null || array.length == 0) {
