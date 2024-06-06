@@ -102,8 +102,6 @@ public class Testy extends Application
 			methodPane.getStyleClass().add("titled-pane-green");
 
 			methodPane.setExpanded(false);
-			
-			GridPane content = (GridPane) methodPane.getContent();
 		}
 		else
 		{
@@ -119,7 +117,6 @@ public class Testy extends Application
     	
     	methodPanel.getChildren().clear();
     	methodPanel.getChildren().addAll(methodPanes);
-		methodPanel.setPrefHeight(800);
     }
     
     private List<ExpandableTitledPane> createMethodPanes()
@@ -323,6 +320,15 @@ public class Testy extends Application
     	return methodPanes;
     }
 
+	private void alert(AlertType type, String title, String header, String message)
+	{
+		Alert alert = new Alert(type);
+		alert.setTitle(title);
+		alert.setHeaderText(header);
+		alert.setContentText(message);
+		alert.showAndWait();
+	}
+
 	private void alert(String methodName, String message)
 	{
 		Alert alert = new Alert(AlertType.ERROR);
@@ -452,6 +458,7 @@ public class Testy extends Application
 	{
 		if (dirty) {
 			//TODO: make this an alert
+			alert(AlertType.WARNING, "Unsaved changes", "Unsaved changes detected", "Please save first!");
 			System.out.println("Unsaved changes, please save first!");
 			return;
 		}
