@@ -47,6 +47,13 @@
 
 .exception-label {
     -fx-font-color: rgb(161, 57, 57);
+    -fx-text-fill: rgb(161, 57, 57);
+}
+
+.answer-textarea-uneditable {
+    -fx-font-color: green;
+    -fx-text-fill: green;
+    -fx-font-style: italic;
 }
 
 .selected {

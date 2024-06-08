@@ -153,6 +153,10 @@ public class Testy extends Application
 				content.add(label1, 0, i + 1);
 				// add to column 1, row i+1 (adding 1 because of the header row)
 				final Label label2 = new Label(testCase.getResult());
+				if (testCase.getResult().startsWith("EXCEPTION"))
+				{
+					label2.getStyleClass().add("exception-label");
+				}
 				content.add(label2, 1, i + 1);
 				//TODO: add highlighting of the row when clicked
 			}
@@ -250,8 +254,8 @@ public class Testy extends Application
 			TextArea answer = new TextArea();
 			answer.setPromptText("What does this method do?");
 			answer.setWrapText(true);
-			answer.setPrefRowCount(3);
-			answer.setPrefColumnCount(25);
+			answer.setPrefRowCount(2);
+			//answer.setPrefColumnCount(25);
 			answer.getStyleClass().add("answer-textarea");
 
 			// vertical box for the answer that can grow
@@ -261,44 +265,60 @@ public class Testy extends Application
 			VBox.setVgrow(answer, Priority.ALWAYS);
 			answerBox.getChildren().add(answer);
 
-			String title = "Save Answer";
+			content.addRow(answerRow, answerBox);
+			// span two columns
+			GridPane.setColumnSpan(answerBox, 2);
+
+			// One button, two different possible meanings:
+			// "edit answer": unlocks the textarea for editing
+			// "save answer": saves the answer, locks the textarea for editing
+			boolean hasAnswer = methodData.getAnswer() != null;
 			if (methodData.getAnswer() != null)
 			{
 				answer.setText(methodData.getAnswer());
-				// the answer should show up in a tooltip when the user hovers over the textfield
-				// this is useful for long answers
-				// we want a short delay before the tooltip shows up, and word wrapping
-				// answer.setTooltip(new Tooltip(methodData.getAnswer()));
-				// answer.tooltipProperty().get().setShowDelay(javafx.util.Duration.millis(50));
-				// answer.tooltipProperty().get().setWrapText(true);
-				// answer.tooltipProperty().get().setPrefWidth(400);
-				title = "Edit Answer";
+				answer.getStyleClass().add("answer-textarea-uneditable");
+				answer.setEditable(false);
 			}
 
-			//content.addRow(answerRow, answer);
-			content.addRow(answerRow, answerBox);
-			// create a button to add the answer
-			Button saveAnswerButton = new Button(title);
-			content.addRow(answerRow, saveAnswerButton);
-			saveAnswerButton.setOnAction(event -> {
-				// disallow saving empty answers
-				// these are most likely mistakes
-				String text = answer.getText();
-				if (text == null || text.isEmpty()) {
-					alert(methodData.getName(), "Please provide an answer");
-					return;
+			Button saveOrEditButton = new Button(hasAnswer ? "Edit Answer" : "Save Answer");
+
+			saveOrEditButton.setOnAction(event -> {
+				//Button b = (Button)event.getSource();
+				if (saveOrEditButton.getText().equals("Edit Answer"))
+				{
+					// we now want to edit the answer
+					answer.getStyleClass().remove("answer-textarea-uneditable");
+					answer.setEditable(true);
+					saveOrEditButton.setText("Save Answer");
 				}
-				methodData.setAnswer(text);
-				dirty = true;
-				// need to get the save thing
-				saveAnswer(text, index2);
+				else
+				{
+					// disallow saving empty answers
+					// these are most likely mistakes
+					String text = answer.getText();
+					if (text == null || text.isEmpty()) {
+						alert(methodData.getName(), "Please provide an answer");
+						return;
+					}
+					answer.getStyleClass().add("answer-textarea-uneditable");
+					answer.setEditable(false);
+					methodData.setAnswer(text);
+					dirty = true;
+					// need to get the save thing
+					saveAnswer(text, index2);
+					// once we've saved the answer, we can edit it
+					saveOrEditButton.setText("Edit Answer");
+				}
 			});
+
+			// add the edit/save button to the gridpane
+			content.addRow(answerRow+1, saveOrEditButton);
 			
 			
 			// add the title and the mouse click event for expanding/contracting each method
 			String headerString = methodData.getHeader();
 	        ExpandableTitledPane titlePane = new ExpandableTitledPane(headerString, content);
-			if (methodData.getAnswer() != null)
+			if (hasAnswer)
 				titlePane.getStyleClass().add("titled-pane-green");
 			else
 				titlePane.getStyleClass().add("titled-pane-grey");
