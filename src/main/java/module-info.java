@@ -6,8 +6,8 @@ module TestyMcTestface {
   requires com.google.gson;
   requires org.objectweb.asm;
 
-  main-class = edu.knox.cder.testy.Testy;
+  //main-class = edu.knox.cder.testy.Testy;
 
   exports edu.knox.cder.testy;
-  exports check;
+  //exports check;
 }

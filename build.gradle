@@ -1,11 +1,8 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
-
-group 'edu.knox.cder.testy'
-version '0.0.1'
 
 repositories {
     mavenCentral()
@@ -16,6 +13,11 @@ javafx {
     modules = [ 'javafx.base', 'javafx.controls', 'javafx.fxml', 'javafx.graphics' ] 
 }
 
+application {
+    mainModule = 'edu.knox.cder.testy'
+    mainClass = 'edu.knox.cder.testy.Main'
+}
+
 dependencies{
 	implementation group: 'org.ow2.asm', name: 'asm', version: '9.6'
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
@@ -24,24 +26,16 @@ dependencies{
 
 }
 
-application {
-    // https://stackoverflow.com/questions/52569724/javafx-11-create-a-jar-file-with-gradle
-    mainClassName = 'edu.knox.cder.testy.Testy'
-    //mainClassName = 'edu.knox.cder.testy.TestTestyCompiler'
-    
-}
 
-tasks.withType(Jar) {
-    // TODO: why is this necessary?
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
+
 
 // https://gist.github.com/jdavidzapatab/1c974b5422aa5665c59cc6a6a7a91cc9
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': "${mainClassName}"
+        attributes 'Main-Class': 'edu.knox.cder.testy.Main'
     }
-    archiveBaseName = "${rootProject.name}"
+    archiveBaseName = 'TMTF'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }

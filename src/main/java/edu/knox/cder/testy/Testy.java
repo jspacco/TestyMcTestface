@@ -636,9 +636,9 @@ public class Testy extends Application
 		return sb.toString();
 	}
     
-    public static void main(String[] args) 
+    public static void start(String[] args) 
     {
-        launch(args);
+        launch(Testy.class, args);
     }
 }
 
