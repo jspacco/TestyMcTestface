@@ -1,41 +1,111 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 repositories {
     mavenCentral()
 }
 
-javafx {
-    version = '21' 
-    modules = [ 'javafx.base', 'javafx.controls', 'javafx.fxml', 'javafx.graphics' ] 
+
+def javafxVersion = '21'
+
+
+// Custom configurations for macOS and Windows
+configurations {
+    mac
+    mac_aarch64
+    windows
 }
 
-application {
-    mainModule = 'edu.knox.cder.testy'
-    mainClass = 'edu.knox.cder.testy.Main'
-}
-
-dependencies{
-	implementation group: 'org.ow2.asm', name: 'asm', version: '9.6'
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+    
+    implementation group: 'org.ow2.asm', name: 'asm', version: '9.6'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
     implementation 'com.google.guava:guava:31.1-jre'
 
+    implementation "org.openjfx:javafx-controls:${javafxVersion}"
+    implementation "org.openjfx:javafx-fxml:${javafxVersion}"
+    implementation "org.openjfx:javafx-base:${javafxVersion}"
+    implementation "org.openjfx:javafx-graphics:${javafxVersion}"
+
+    // x86 macOS-specific JavaFX dependencies
+    mac "org.openjfx:javafx-controls:$javafxVersion:mac"
+    mac "org.openjfx:javafx-fxml:$javafxVersion:mac"
+    mac "org.openjfx:javafx-base:$javafxVersion:mac"
+    mac "org.openjfx:javafx-graphics:$javafxVersion:mac"
+
+    // ARM macOS-specific JavaFX dependencies
+    mac_aarch64 "org.openjfx:javafx-controls:$javafxVersion:mac-aarch64"
+    mac_aarch64 "org.openjfx:javafx-fxml:$javafxVersion:mac-aarch64"
+    mac_aarch64 "org.openjfx:javafx-base:$javafxVersion:mac-aarch64"
+    mac_aarch64 "org.openjfx:javafx-graphics:$javafxVersion:mac-aarch64"
+
+    // Windows-specific JavaFX dependencies
+    windows "org.openjfx:javafx-controls:$javafxVersion:win"
+    windows "org.openjfx:javafx-fxml:$javafxVersion:win"
+    windows "org.openjfx:javafx-base:$javafxVersion:win"
+    windows "org.openjfx:javafx-graphics:$javafxVersion:win"
 }
 
 
-
-
-// https://gist.github.com/jdavidzapatab/1c974b5422aa5665c59cc6a6a7a91cc9
-task fatJar(type: Jar) {
+// Task to create a JAR for macOS with macOS-specific JavaFX libraries
+task jarMacARM(type: Jar) {
+    archiveClassifier.set('mac_aarch64')
     manifest {
         attributes 'Main-Class': 'edu.knox.cder.testy.Main'
     }
     archiveBaseName = 'TMTF'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    // Include common runtime dependencies
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        
+    from {
+        configurations.mac_aarch64.collect { it.isDirectory() ? it : zipTree(it) }
+    }
     with jar
 }
+
+task jarMacX86(type: Jar) {
+    archiveClassifier.set('mac')
+    manifest {
+        attributes 'Main-Class': 'edu.knox.cder.testy.Main'
+    }
+    archiveBaseName = 'TMTF'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // Include common runtime dependencies
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        
+    from {
+        configurations.mac.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+// Task to create a JAR for Windows with Windows-specific JavaFX libraries
+task jarWindows(type: Jar) {
+    archiveClassifier.set('windows')
+    manifest {
+        attributes 'Main-Class': 'edu.knox.cder.testy.Main'
+    }
+    archiveBaseName = 'TMTF'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // Include common runtime dependencies
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    
+    from {
+        configurations.windows.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += [
+        '--module-path', configurations.mac.asPath + ':' + configurations.mac_aarch64.asPath  + ':' + configurations.windows.asPath,
+        '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.base'
+    ]
+}
+
+build.dependsOn jarMacARM, jarMacX86, jarWindows
