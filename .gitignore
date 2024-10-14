@@ -18,6 +18,12 @@ assignments/
 # Compiled class file
 *.class
 
+# Ignore all .java files in the root directory
+/*.java
+
+# Don't ignore .java files in the src directory
+!/src/**/*.java
+
 # Log file
 *.log
 

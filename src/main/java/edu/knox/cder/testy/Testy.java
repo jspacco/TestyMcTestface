@@ -217,7 +217,8 @@ public class Testy extends Application
 					Object res = method.invoke(null, params);
 					System.out.printf("invoked %s, got back %s\n", arrayToString(params), res.toString());
 					
-					//TODO: if res is an array, convert it to a string
+					// if res is an array, convert it to a string
+					// we want [1,2,3] and not [I@1a2b3c4d
 					if (res instanceof int[])
 					{
 						res = Arrays.toString((int[])res);
