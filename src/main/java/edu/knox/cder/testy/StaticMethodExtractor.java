@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.objectweb.asm.ClassReader;
 
@@ -140,7 +141,8 @@ public class StaticMethodExtractor
     
     
 
-    public static void writeJson(TestClassData testClassData, String filePath) throws IOException {
+    public static void writeJson(TestClassData testClassData, String filePath) throws IOException 
+	{
         Map<String, Object> jsonMap = testClassData.toMap();
         
 
@@ -195,6 +197,17 @@ public class StaticMethodExtractor
 		return gson.fromJson(text, int[].class);
 	}
 
+	static ArrayList<Integer> readIntegerList(String text)
+	{
+		return Arrays.stream(readIntArray(text)).boxed().collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	static ArrayList<String> readStringList(String text)
+	{
+		// convert to arraylist
+		return Arrays.stream(readStringArray(text)).collect(Collectors.toCollection(ArrayList::new));
+	}
+
 	static String readString(String text)
 	{
 		Gson gson = new Gson();
@@ -221,6 +234,19 @@ public class StaticMethodExtractor
 			if (type.equals("int[]"))
 			{
 				readIntArray(text);
+				return true;
+			}
+			if (type.equals("ArrayList<Integer>"))
+			{
+				//FIXME: because of type erasure, we can't validate this
+				//TODO: use GenericTypes annotation to specify the types
+				readIntegerList(text);
+				return true;
+			}
+			if (type.equals("ArrayList<String>"))
+			{
+				//FIXME: type erasure means we don't know the actual type
+				readStringList(text);
 				return true;
 			}
 			if (type.equals("int"))

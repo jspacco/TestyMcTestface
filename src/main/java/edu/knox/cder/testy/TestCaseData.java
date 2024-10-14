@@ -74,6 +74,10 @@ public class TestCaseData
 			{
 				result[i] = StaticMethodExtractor.readIntArray(p);
 			} 
+			else if (type.equals("ArrayList<Integer>"))
+			{
+				result[i] = StaticMethodExtractor.readIntegerList(p);
+			}
 			else if (type.equals("int"))
 			{
 				result[i] = Integer.parseInt(p);
@@ -86,6 +90,10 @@ public class TestCaseData
 			{
 				result[i] = StaticMethodExtractor.readStringArray(p);
 			} 
+			else if (type.equals("ArrayList<String>"))
+			{
+				result[i] = StaticMethodExtractor.readStringList(p);
+			}
 			else
 			{
 				throw new RuntimeException(String.format("Unknown type: %s", type));

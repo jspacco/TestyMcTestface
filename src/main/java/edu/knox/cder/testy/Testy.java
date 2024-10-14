@@ -185,6 +185,7 @@ public class Testy extends Application
 				List<ParameterData> parameters = methodData.getParameters();
 				
 				List<String> actualParameters = new LinkedList<>();
+				// pull actual paramters from the text fields in the GUI
 				for (int i=0; i<inputs.length; i++) {
 					String type = parameters.get(i).getType();
 					String value = inputs[i].getText();
@@ -216,6 +217,15 @@ public class Testy extends Application
 					Object res = method.invoke(null, params);
 					System.out.printf("invoked %s, got back %s\n", arrayToString(params), res.toString());
 					
+					//TODO: if res is an array, convert it to a string
+					if (res instanceof int[])
+					{
+						res = Arrays.toString((int[])res);
+					}
+					else if (res instanceof String[])
+					{
+						res = Arrays.toString((String[])res);
+					}
 					testCaseData.setResult(res.toString());
 					methodData.addTest(testCaseData);
 					// set dirty so that we save to the json file

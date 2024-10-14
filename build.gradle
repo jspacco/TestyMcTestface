@@ -9,6 +9,8 @@ repositories {
 
 
 def javafxVersion = '21'
+def mainClassName = 'edu.knox.cder.testy.Main'
+def archiveBaseName = 'TMTF'
 
 
 // Custom configurations for macOS and Windows
@@ -49,56 +51,29 @@ dependencies {
     windows "org.openjfx:javafx-graphics:$javafxVersion:win"
 }
 
-
-// Task to create a JAR for macOS with macOS-specific JavaFX libraries
-task jarMacARM(type: Jar) {
-    archiveClassifier.set('mac_aarch64')
-    manifest {
-        attributes 'Main-Class': 'edu.knox.cder.testy.Main'
+// common jar logic
+def createJarTask = { taskName, configName, classifierName ->
+    tasks.register(taskName, Jar) {
+        archiveClassifier.set(classifierName)
+        manifest {
+            attributes 'Main-Class': mainClassName
+        }
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from {
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+        from {
+            configurations[configName].collect { it.isDirectory() ? it : zipTree(it) }
+        }
+        with jar
     }
-    archiveBaseName = 'TMTF'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    // Include common runtime dependencies
-    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-        
-    from {
-        configurations.mac_aarch64.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    with jar
 }
 
-task jarMacX86(type: Jar) {
-    archiveClassifier.set('mac')
-    manifest {
-        attributes 'Main-Class': 'edu.knox.cder.testy.Main'
-    }
-    archiveBaseName = 'TMTF'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    // Include common runtime dependencies
-    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-        
-    from {
-        configurations.mac.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    with jar
-}
+// Create platform-specific JAR tasks
+createJarTask('jarMacARM', 'mac_aarch64', 'mac_aarch64')
+createJarTask('jarMacX86', 'mac', 'mac')
+createJarTask('jarWindows', 'windows', 'windows')
 
-// Task to create a JAR for Windows with Windows-specific JavaFX libraries
-task jarWindows(type: Jar) {
-    archiveClassifier.set('windows')
-    manifest {
-        attributes 'Main-Class': 'edu.knox.cder.testy.Main'
-    }
-    archiveBaseName = 'TMTF'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    // Include common runtime dependencies
-    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    
-    from {
-        configurations.windows.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    with jar
-}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
