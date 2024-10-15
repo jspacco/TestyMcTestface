@@ -45,6 +45,8 @@ TODO
 * trigger saving to JSON as soon as you upload a classfile
 	* autosave after adding every new test case
 * tooltips
+* YES/NO mode for testing that methods work correctly
+    * Tooltips for the method description (also somewhere to store the description in the bytecode)
 * show the empty string better
 * " and ' both work for strings since we are treating inputs as JSON; either allow this, or catch it in the GUI and disallow it
 * allow the expandable method panes to resize up to the size of the main window; right now there is a fixed size somewhere, probably set in the scene

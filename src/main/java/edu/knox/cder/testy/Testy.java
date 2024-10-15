@@ -215,7 +215,7 @@ public class Testy extends Application
 				try {
 					System.out.printf("invoking method %s with %s\n", method.getName(), arrayToString(params));
 					Object res = method.invoke(null, params);
-					System.out.printf("invoked %s, got back %s\n", arrayToString(params), res.toString());
+					System.out.printf("invoked %s, got back %s\n", arrayToString(params), customToString(res));
 					
 					// if res is an array, convert it to a string
 					// we want [1,2,3] and not [I@1a2b3c4d
@@ -494,7 +494,12 @@ public class Testy extends Application
 			return;
 		}
 		this.jsonFile = file;
-		testClassData = TestClassData.readJson(jsonFile.getPath());
+		try {
+			testClassData = TestClassData.readJson(jsonFile.getPath());
+		} catch (Exception e) {
+			alert(AlertType.ERROR, "Error reading json file", "Error reading json file", "Are you sure this is a JSON file?");
+			throw new IOException(e);
+		}
 		methods = StaticMethodExtractor.getStaticMethods(testClassData.getClassName(), testClassData.getBytecode());
 		dirty = false;
 
@@ -509,7 +514,13 @@ public class Testy extends Application
 			//JOptionPane.showMessageDialog(null, "Unsaved changes, please save first!");
 			return;
 		}
-		testClassData = StaticMethodExtractor.readFromClassFile(classFile);
+		
+		try {
+			testClassData = StaticMethodExtractor.readFromClassFile(classFile);
+		} catch (Exception e) {
+			alert(AlertType.ERROR, "Error reading class file", "Error reading class file", "Are you sure this is a class file?");
+			throw new IOException(e);
+		}
 		methods = StaticMethodExtractor.getStaticMethods(testClassData.getClassName(), testClassData.getBytecode());
 		dirty = false;
 		System.out.printf("loaded %d methods from %s (%d now in testClassData)\n", 
@@ -646,6 +657,21 @@ public class Testy extends Application
 		sb.append("]");
 		return sb.toString();
 	}
+
+	
+    private static String customToString(Object obj) {
+        if (obj == null) {
+            return "null";
+        } else if (obj instanceof int[]) {
+			return Arrays.toString((int[]) obj);
+		} else if (obj instanceof String[]) {
+			return Arrays.toString((String[]) obj);
+		} else if (obj instanceof Object[]) {
+			return arrayToString((Object[]) obj);
+        } else {
+            return obj.toString();
+        }
+    }
     
     public static void start(String[] args) 
     {

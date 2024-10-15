@@ -76,8 +76,7 @@ public class StaticMethodExtractor
         Method[] methods = clazz.getDeclaredMethods();
         
         // remove synthetic methods and instance methods
-        // then sort by the method name
-        // Ugh, Java map/filter and lambdas are not as nice as C#
+		// sort by name of method
         return Arrays.asList(Arrays.stream(methods).
         		filter(m -> !m.isSynthetic() && Modifier.isStatic(m.getModifiers())).
         		sorted((m1, m2) -> {
@@ -211,7 +210,9 @@ public class StaticMethodExtractor
 	static String readString(String text)
 	{
 		Gson gson = new Gson();
-		return gson.fromJson(text, String.class);
+		String s = gson.fromJson(text, String.class);
+		System.out.printf("String: %s has length %d\n", s, s.length());
+		return s;
 	}
 
 	static double readDouble(String text)
@@ -223,11 +224,14 @@ public class StaticMethodExtractor
 	static String[] readStringArray(String text)
 	{
 		Gson gson = new Gson();
-		return gson.fromJson(text, String[].class);
+		String[] sarr = gson.fromJson(text, String[].class);
+		System.out.println("String array: "+Arrays.toString(sarr));
+		return sarr;
 	}
 	
 	static boolean validate(String text, String type)
 	{
+		System.out.println("Validating: "+text+" as "+type);
 		if (text == null || text.isEmpty())
 			return false;
 		try {
@@ -263,6 +267,10 @@ public class StaticMethodExtractor
 			{
 				readStringArray(text);
 				return true;
+			}
+			if (type.equals("char"))
+			{
+				return text.matches("'.'");
 			}
 			throw new RuntimeException("Unknown type: "+type);
 		} catch (Exception e) {

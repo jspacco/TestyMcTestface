@@ -82,9 +82,15 @@ public class TestCaseData
 			{
 				result[i] = Integer.parseInt(p);
 			} 
+			else if (type.equals("char"))
+			{
+				result[i] = p.charAt(1);
+			}
 			else if (type.equals("String"))
 			{
-				result[i] = StaticMethodExtractor.readString(p);
+				String s = StaticMethodExtractor.readString(p);
+				System.out.printf("String: %s has length %d\n", s, s.length());
+				result[i] = s;
 			} 
 			else if (type.equals("String[]"))
 			{
