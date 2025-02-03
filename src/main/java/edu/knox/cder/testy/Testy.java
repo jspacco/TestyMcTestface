@@ -1,6 +1,8 @@
 package edu.knox.cder.testy;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -66,12 +68,13 @@ public class Testy extends Application
 		}
 
 		// remove the last 2 rows, which are the new test form and the answer form
+		// the answer form is a single VBox containing both parts
 		// we remove them by removing the children from the gridpane
 		// I can't figure out how to remove a whole row and there may
 		// not be a way to do that in JavaFX
-		Node saveButton = content.getChildren().remove(content.getChildren().size()-1);
-		Node saveInput = content.getChildren().remove(content.getChildren().size()-1);
+		Node editOrSaveButtonAndInput = content.getChildren().remove(content.getChildren().size()-1);
 
+		// also get the check button and the new test input
 		Node checkButton = content.getChildren().remove(content.getChildren().size()-1);
 		Node newTestInput = content.getChildren().remove(content.getChildren().size()-1);
 
@@ -84,7 +87,7 @@ public class Testy extends Application
 		// add back in the new test input row
 		content.addRow(content.getRowCount(), newTestInput, checkButton);
 		// add back in the answer row
-		content.addRow(content.getRowCount(), saveInput, saveButton);
+		content.addRow(content.getRowCount(), editOrSaveButtonAndInput);
 		
 		// clear the text fields used for the new test case
 		HBox hBox = (HBox) newTestInput;
@@ -276,10 +279,6 @@ public class Testy extends Application
 			VBox.setVgrow(answer, Priority.ALWAYS);
 			answerBox.getChildren().add(answer);
 
-			content.addRow(answerRow, answerBox);
-			// span two columns
-			GridPane.setColumnSpan(answerBox, 2);
-
 			// One button, two different possible meanings:
 			// "edit answer": unlocks the textarea for editing
 			// "save answer": saves the answer, locks the textarea for editing
@@ -291,6 +290,7 @@ public class Testy extends Application
 				answer.setEditable(false);
 			}
 
+			// save or edit button
 			Button saveOrEditButton = new Button(hasAnswer ? "Edit Answer" : "Save Answer");
 
 			saveOrEditButton.setOnAction(event -> {
@@ -322,8 +322,33 @@ public class Testy extends Application
 				}
 			});
 
-			// add the edit/save button to the gridpane
-			content.addRow(answerRow+1, saveOrEditButton);
+			// vbox for the answer and the button together
+			VBox answerContainer = new VBox();
+			answerContainer.setPadding(new Insets(10));
+			answerContainer.setSpacing(10); // Add spacing between the text area and button
+
+			// Add the answer box and button inside the VBox
+			answerContainer.getChildren().addAll(answerBox, saveOrEditButton);
+
+			// Add the answerContainer to the GridPane
+			content.addRow(answerRow+1, answerContainer);
+
+			// Ensure the answerBox takes up two columns
+			GridPane.setColumnSpan(answerContainer, 2);
+
+
+			
+			// // Don't add this yet
+			// content.addRow(answerRow, answerBox);
+			// // span two columns
+			// GridPane.setColumnSpan(answerBox, 2);
+
+			
+
+			// // add the edit/save button to the gridpane
+			// //TODO: put the button BELOW the answer box, ugh
+			// //content.addRow(answerRow+1, saveOrEditButton);
+			// content.addRow(answerRow+2, saveOrEditButton);
 			
 			
 			// add the title and the mouse click event for expanding/contracting each method
@@ -536,6 +561,64 @@ public class Testy extends Application
     	menuBar.getStyleClass().add("menubar");
 
     	Menu fileMenu = new Menu("File");
+		createMenuItem(fileMenu, "HTMLify", () -> {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setInitialDirectory(new File("."));
+			jsonFile = fileChooser.showOpenDialog(stage);
+
+			if (jsonFile != null)
+			{
+				StringBuffer sb = new StringBuffer();
+				try {
+					testClassData = TestClassData.readJson(jsonFile.getPath());
+					
+					sb.append("<html><head><title>Testy McTestface</title></head><body><table border='1'>\n");
+					sb.append("<tr><th>Method</th><th>Header</th><th>Answer</th></tr>\n");
+
+					testClassData.getMethods().forEach(m -> {
+						String name = m.getName();
+						String header = m.getHeader();
+						String answer = m.getAnswer();
+						
+						sb.append(String.format("<tr>\n\t%s\n\t%s\n\t%s\n</tr>\n", td(b(name)), td(b(header)), td(b(answer))));
+					
+						m.getTests().forEach(t -> {
+							String params = String.join(", ", t.getActualParameters());
+							String result = t.getResult();
+							sb.append(String.format("<tr>\n\t%s\n\t%s\n\t<td></td>\n</tr>\n", td(params), td(result)));
+						});
+						sb.append("<tr><td colspan='3'>&nbsp;</td></tr>\n");
+					});
+					
+					sb.append("</table></body></html>");
+				} catch (Exception e) {
+					alert(AlertType.ERROR, "Error reading json file", "Error reading json file", "Are you sure this is a JSON file?");
+				}
+				String html = sb.toString();
+				String filePath = null;
+				try {
+					// Choose a new location to save the file
+					FileChooser fileChooser2 = new FileChooser();
+					fileChooser2.setInitialDirectory(new File("."));
+					File htmlFile = fileChooser2.showSaveDialog(stage);
+					// so that we have this string for exceptions
+					filePath = htmlFile.getAbsolutePath();
+					if (htmlFile != null)
+					{
+						BufferedWriter bw = new BufferedWriter(new FileWriter(htmlFile));
+						bw.write(html);
+						bw.flush();
+						bw.close();
+					}
+					alert(AlertType.INFORMATION, "HTML file written", "HTML file written", "HTML file written to " + htmlFile.getAbsolutePath());
+				} catch (Exception e) {
+					alert(AlertType.ERROR, "Error writing to HTML file", "Error writing to HTML file", "Cannot write to " + filePath);
+				}
+			}
+		});
+		createMenuItem(fileMenu, "Expand All", () -> {
+			methodPanes.forEach(p -> p.setExpanded(true));
+		});
 		createMenuItem(fileMenu, "Load json", () -> {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setInitialDirectory(new File("."));
@@ -597,7 +680,7 @@ public class Testy extends Application
 				//TODO: add alert
 				if (!quit) 
 				{
-					System.out.println("Unable to asave file, quitting");
+					System.out.println("Unable to save file, quitting");
 					return;
 				}
 			}
@@ -656,6 +739,16 @@ public class Testy extends Application
 		sb.deleteCharAt(sb.length() - 1); // remove trailing comma
 		sb.append("]");
 		return sb.toString();
+	}
+
+	private static String td(String s)
+	{
+		return "<td>" + s + "</td>";
+	}
+
+	private static String b(String s)
+	{
+		return "<b>" + s + "</b>";
 	}
 
 	

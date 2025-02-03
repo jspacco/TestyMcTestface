@@ -45,18 +45,23 @@ TODO
 * trigger saving to JSON as soon as you upload a classfile
 	* autosave after adding every new test case
 * tooltips
+* allow copy/paste of test cases
+* src/main/json folder
+* load a file without saving the previous one
+* edit button location
+* fix build.gradle for loading JavaFX
+* single vs double quotes for chars vs. strings
+* "enter" should save and run the test case
 * YES/NO mode for testing that methods work correctly
     * Tooltips for the method description (also somewhere to store the description in the bytecode)
 * show the empty string better
 * " and ' both work for strings since we are treating inputs as JSON; either allow this, or catch it in the GUI and disallow it
 * allow the expandable method panes to resize up to the size of the main window; right now there is a fixed size somewhere, probably set in the scene
 * highlight rows when we click them
-* allow copy/paste of test cases
 * check the UI of the test cases and make sure it makes sense; should we put in method name? should we try other columns to keep it more organized?
 *  I would suggest to not name the button "Edit Answer" after something is typed into the answer box. When I pushed the button, it just brought me outside of the question that I was in and did not let me edit the text box. This button should be non-interactable until there was an edit made by the user within the text box so that it will save that answer and leave that question.
 * Tooltip should show up based on the TextBox, not just the answer
 * make a template that already has the opening and closing bracket, so you are not required to type it every single time
-* "enter" should save and run the test case
 * hint feature after 20 guesses — can we do that based on things?
 
 # 142
