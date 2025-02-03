@@ -10,6 +10,7 @@ repositories {
 
 
 def javafxVersion = '21'
+def linuxVersion = '21'
 def mainClassName = 'edu.knox.cder.testy.Main'
 def archiveBaseName = 'TMTF'
 
@@ -55,13 +56,15 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
     
     implementation group: 'org.ow2.asm', name: 'asm', version: '9.6'
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+
     implementation 'com.google.guava:guava:31.1-jre'
 
-    implementation "org.openjfx:javafx-controls:${javafxVersion}"
-    implementation "org.openjfx:javafx-fxml:${javafxVersion}"
-    implementation "org.openjfx:javafx-base:${javafxVersion}"
-    implementation "org.openjfx:javafx-graphics:${javafxVersion}"
+    // implementation "org.openjfx:javafx-controls:${javafxVersion}"
+    // implementation "org.openjfx:javafx-fxml:${javafxVersion}"
+    // implementation "org.openjfx:javafx-base:${javafxVersion}"
+    // implementation "org.openjfx:javafx-graphics:${javafxVersion}"
 
     // x86 macOS-specific JavaFX dependencies
     mac "org.openjfx:javafx-controls:$javafxVersion:mac"
@@ -80,6 +83,16 @@ dependencies {
     windows "org.openjfx:javafx-fxml:$javafxVersion:win"
     windows "org.openjfx:javafx-base:$javafxVersion:win"
     windows "org.openjfx:javafx-graphics:$javafxVersion:win"
+
+    linux "org.openjfx:javafx-controls:${linuxVersion}:linux"
+    linux "org.openjfx:javafx-fxml:${linuxVersion}:linux"
+    linux "org.openjfx:javafx-base:${linuxVersion}:linux"
+    linux "org.openjfx:javafx-graphics:${linuxVersion}:linux"
+}
+
+javafx {
+    version = javafxVersion
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.base', 'javafx.graphics' ]
 }
 
 // common jar logic
@@ -90,9 +103,14 @@ def createJarTask = { taskName, configName, classifierName ->
             attributes 'Main-Class': mainClassName
         }
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        // Include runtime classpath (but exclude JavaFX dependencies)
         from {
-            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+            configurations.runtimeClasspath.filter {
+                !(it.name.contains("javafx")) // Exclude JavaFX from runtimeClasspath to avoid conflicts
+            }.collect { it.isDirectory() ? it : zipTree(it) }
         }
+
+        // Include only platform-specific JavaFX dependencies
         from {
             configurations[configName].collect { it.isDirectory() ? it : zipTree(it) }
         }
@@ -104,14 +122,15 @@ def createJarTask = { taskName, configName, classifierName ->
 createJarTask('jarMacARM', 'mac_aarch64', 'mac_aarch64')
 createJarTask('jarMacX86', 'mac', 'mac')
 createJarTask('jarWindows', 'windows', 'windows')
+createJarTask('jarLinux', 'linux', 'linux')
 
 
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    options.compilerArgs += [
-        '--module-path', configurations.mac.asPath + ':' + configurations.mac_aarch64.asPath  + ':' + configurations.windows.asPath,
-        '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.base'
-    ]
-}
+// tasks.withType(JavaCompile) {
+//     options.encoding = 'UTF-8'
+//     options.compilerArgs += [
+//         '--module-path', configurations.mac.asPath + ':' + configurations.mac_aarch64.asPath  + ':' + configurations.windows.asPath,
+//         '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.base'
+//     ]
+// }
 
-build.dependsOn jarMacARM, jarMacX86, jarWindows
+build.dependsOn jarMacARM, jarMacX86, jarWindows, jarLinux
