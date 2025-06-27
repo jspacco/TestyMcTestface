@@ -40,7 +40,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class Testy extends Application 
+ public class Testy extends Application 
 {
 	private File jsonFile;
 	private boolean dirty = false;
@@ -444,8 +444,10 @@ public class Testy extends Application
     	
     	if (result == saveButtonType)
     	{
-    		saveToJsonFile();
-    		return true;
+			if (jsonFile == null) {
+				saveAsPrompt(window);
+			}
+    		return saveToJsonFile();
     	} 
     	else if (result == quitButtonType)
     	{
@@ -463,6 +465,10 @@ public class Testy extends Application
     
     private boolean saveToJsonFile()
     {
+		if (jsonFile == null) {
+			return false;
+		}
+
     	if (jsonFile != null) {
     	    try {
 				testClassData.writeJson(jsonFile);
@@ -518,9 +524,9 @@ public class Testy extends Application
 			System.out.println("Unsaved changes, please save first!");
 			return;
 		}
-		this.jsonFile = file;
 		try {
-			testClassData = TestClassData.readJson(jsonFile.getPath());
+			testClassData = TestClassData.readJson(file.getPath());
+			this.jsonFile = file;
 		} catch (Exception e) {
 			alert(AlertType.ERROR, "Error reading json file", "Error reading json file", "Are you sure this is a JSON file?");
 			throw new IOException(e);
